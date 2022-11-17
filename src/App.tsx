@@ -2,27 +2,31 @@ import React, { Component } from "react";
 import "./styles.css";
 import * as markerjs2 from "markerjs2";
 import { TriangleMarker } from "./TriangleMarker";
-import Upload from "./Upload";
+import Upload, { FileInfo } from "./Upload";
+
 type AppState = {
-  files: {
-    base64: string | null;
-  };
+  fileInfo: FileInfo;
 };
-class App extends Component<{}, AppState> {
+
+class App extends Component<any, AppState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      files: {
+      fileInfo: {
+        name: null,
+        type: null,
+        size: null,
         base64: null,
+        file: null,
       },
     };
   }
 
-  getFiles(files: any) {
-    this.setState({ files: files });
-  }
-
   imgRef = React.createRef<HTMLImageElement>();
+
+  setFilesInfo(fileInfo: FileInfo) {
+    this.setState({ fileInfo });
+  }
 
   showMarkerArea() {
     if (this.imgRef.current !== null) {
@@ -49,13 +53,15 @@ class App extends Component<{}, AppState> {
         <div className="text-center mt-25">
           <p className="text-center">Test Movel AI </p>
           <p className="text-center mb-2">Agung Satrio Wibowo Markup Tool </p>
-          <Upload onDone={(fileData: any[]) => this.getFiles(fileData)} />
+          <Upload
+            onDone={(fileInfo: FileInfo) => this.setFilesInfo(fileInfo)}
+          />
         </div>
         <div className="text-center">
-          {this.state.files.base64 && (
+          {this.state.fileInfo.base64 && (
             <img
               ref={this.imgRef}
-              src={this.state.files.base64}
+              src={this.state.fileInfo.base64}
               alt="sample"
               crossOrigin="anonymous"
               style={{ maxWidth: "30%" }}

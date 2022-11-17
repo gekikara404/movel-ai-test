@@ -1,22 +1,31 @@
 import React from "react";
-type UploadState = {
-  files: {
-    base64: string | null;
-  };
+
+export type FileInfo = {
+  name: string | null;
+  type: string | null;
+  size: string | null;
+  base64: string | null;
+  file: File | null;
 };
 
+interface UploadState {
+  fileInfo: FileInfo;
+}
+
 interface UploadProps {
-  onDone: (fileData: any[]) => void;
-  multiple: boolean;
+  onDone: (fileData: FileInfo) => void;
 }
 
 export default class Upload extends React.Component<UploadProps, UploadState> {
-  static defaultProps: { multiple: boolean };
   constructor(props: UploadProps) {
     super(props);
     this.state = {
-      files: {
+      fileInfo: {
+        name: null,
+        type: null,
+        size: null,
         base64: null,
+        file: null,
       },
     };
   }
@@ -26,8 +35,7 @@ export default class Upload extends React.Component<UploadProps, UploadState> {
     // get the files
     let files = element.files;
     // Process each file
-    const allFiles: any[] = [];
-    if (files !== null) {
+    if (files) {
       for (let i = 0; i < files.length; i++) {
         let file = files[i];
         // Make new FileReader
@@ -37,23 +45,17 @@ export default class Upload extends React.Component<UploadProps, UploadState> {
         // on reader load somthing...
         reader.onload = () => {
           // Make a fileInfo Object
-          let fileInfo = {
+          const fileInfo: FileInfo = {
             name: file.name,
             type: file.type,
             size: Math.round(file.size / 1000) + " kB",
-            base64: reader.result,
+            base64: reader.result ? reader.result.toString() : null,
             file: file,
           };
           // Push it to the state
-          allFiles.push(fileInfo);
-          // If all files have been proceed
-          if (files && allFiles.length === files.length) {
-            // Apply Callback function
-            if (this.props.multiple) this.props.onDone(allFiles);
-            else this.props.onDone(allFiles[0]);
-          }
+          this.props.onDone(fileInfo);
         }; // reader.onload
-      } // for
+      }
     }
   };
 
@@ -63,11 +65,7 @@ export default class Upload extends React.Component<UploadProps, UploadState> {
         accept="image/png, image/gif, image/jpeg"
         type="file"
         onChange={this.handleChange}
-        multiple={this.props.multiple}
       />
     );
   }
 }
-Upload.defaultProps = {
-  multiple: false,
-};
